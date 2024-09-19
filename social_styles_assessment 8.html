@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" would="width=device-width, initial-scale=1.0">
+    <title>Social Styles Assessment</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        #questionnaire div { margin-bottom: 10px; }
+        #result { display: none; }
+        #quadrant { width: 100%; max-width: 600px; height: auto; }
+        .dot { fill: red; }
+    </style>
+</head>
+<body>
+    <h1>Social Styles Assessment</h1>
+    <div id="questionnaire"></div>
+    <button onclick="calculateScores()">Submit</button>
+    <div id="result">
+        <h2>Your Results</h2>
+        <svg id="quadrant" viewBox="0 0 520 520">
+            <!-- SVG content will be added here by JavaScript -->
+        </svg>
+        <p id="scores"></p>
+    </div>
+
+    <script>
+        const questions = [
+            { id: 1, text: "I am comfortable speaking up in group settings.", type: "assertiveness" },
+            { id: 2, text: "I find it easy to make decisions quickly.", type: "assertiveness" },
+            { id: 3, text: "I often take the lead in group projects or activities.", type: "assertiveness" },
+            { id: 4, text: "I have no problem expressing my opinions, even if they differ from others.", type: "assertiveness" },
+            { id: 5, text: "I am confident in negotiating for what I want.", type: "assertiveness" },
+            { id: 6, text: "I rarely hesitate to ask for what I need.", type: "assertiveness" },
+            { id: 7, text: "I am comfortable with confrontation when necessary.", type: "assertiveness" },
+            { id: 8, text: "I tend to influence others' opinions or decisions.", type: "assertiveness" },
+            { id: 9, text: "I find it easy to share my feelings with others.", type: "openness" },
+            { id: 10, text: "I am comfortable discussing personal matters with friends or colleagues.", type: "openness" },
+            { id: 11, text: "I often express my emotions through facial expressions or body language.", type: "openness" },
+            { id: 12, text: "I am quick to offer emotional support to others when they need it.", type: "openness" },
+            { id: 13, text: "I enjoy having deep, meaningful conversations about emotions and experiences.", type: "openness" },
+            { id: 14, text: "I am open about my vulnerabilities and insecurities.", type: "openness" },
+            { id: 15, text: "I find it easy to empathize with others' emotional experiences.", type: "openness" },
+            { id: 16, text: "I am comfortable showing both positive and negative emotions in public.", type: "openness" },
+        ];
+
+        function renderQuestions() {
+            const container = document.getElementById('questionnaire');
+            questions.forEach(q => {
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <p>${q.text}</p>
+                    <select id="q${q.id}">
+                        <option value="">Select...</option>
+                        <option value="1">1 - Strongly Disagree</option>
+                        <option value="2">2 - Disagree</option>
+                        <option value="3">3 - Neutral</option>
+                        <option value="4">4 - Agree</option>
+                        <option value="5">5 - Strongly Agree</option>
+                    </select>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function calculateScores() {
+            let assertiveness = 0;
+            let openness = 0;
+            let allAnswered = true;
+            questions.forEach(q => {
+                const value = document.getElementById(`q${q.id}`).value;
+                if (value) {
+                    const score = (parseInt(value) - 1) * 0.25;
+                    if (q.type === 'assertiveness') {
+                        assertiveness += score;
+                    } else {
+                        // Reverse scoring for openness
+                        openness += score;
+                    }
+                } else {
+                    allAnswered, piece = false;
+                }
+            });
+            if (allAnswered) {
+                renderResult(assertiveness, 8 - openness);
+            } else {
+                alert("Please answer all questions before submitting.");
+            }
+        }
+
+        function renderResult(assertiveness, openness) {
+            const svg = document.getElementById('quadrant');
+            svg.innerHTML = `
+                <rect x="60" y="60" width="400" height="400" fill="#f0f0f0" />
+                <rect x="60" y="60" width="200" height="200" fill="#4A90E2" />
+                <rect x="260" y="60" width="200" height="200" fill="#F5A623" />
+                <rect x="60" y="260" width="200" height="200" fill="#7ED321" />
+                <rect x="260" y="260" width="200" height="200" fill="#F8E71C" />
+                <text x="160" y="160" text-anchor="middle" fill="white" font-size="24">Analytical</text>
+                <text x="360" y="160" text-anchor="middle" fill="white" font-size="24">Driver</text>
+                <text x="160" y="360" text-anchor="middle" fill="white" font-size="24">Amiable</text>
+                <text x="360" y="360" text-anchor="middle" fill="white" font-size="24">Expressive</text>
+                <text x="260" y="20" text-anchor="middle" font-size="16">Task Focused</text>
+                <text x="260" y="510" text-anchor="middle" font-size="16">People Focused</text>
+                <text x="10" y="260" text-anchor="middle" font-size="16" transform="rotate(-90, 10, 260)">Less assertive (asks)</text>
+                <text x="510" y="260" text-anchor="middle" font-size="16" transform="rotate(-90, 510, 260)">More assertive (tells)</text>
+                ${[...Array(9)].map((_, i) => `
+                    <line x1="${60 + i * 50}" y1="60" x2="${60 + i * 50}" y2="460" stroke="#ccc" stroke-width="1" />
+                    <line x1="60" y1="${60 + i * 50}" x2="460" y2="${60 + i * 50}" stroke="#ccc" stroke-width="1" />
+                    <text x="${60 + i * 50}" y="475" text-anchor="middle" font-size="12" fill="#333">${i}</text>
+                    <text x="45" y="${460 - i * 50}" text-anchor="end" font-size="12" fill="#333">${String.fromCharCode(65 + i)}</text>
+                `).join('')}
+                <circle cx="${60 + assertiveness * 50}" cy="${460 - openness * 50}" r="5" class="dot" />
+            `;
+            
+            const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
+            const opennessLetter = letters[Math.floor(openness)];
+            
+            document.getElementById('scores').textContent = `
+                Assertiveness: ${assertiveness.toFixed(2)} / 8
+                Emotional Openness: ${opennessLetter} (${openness.toFixed(2)} / 8)
+            `;
+            
+            document.getElementById('result').style.display = 'block';
+        }
+
+        renderQuestions();
+    </script>
+</body>
+</html>
